@@ -1,18 +1,20 @@
 import cv2
 import mediapipe as mp
-
-mpHands = mp.solutions.hands
-hands =  mpHands.Hands()
-mpDraw = mp.solutions.drawing_utils
-
+import time
+import handTracking as ht
+prevTime =0
+currTime = 0
 cap = cv2.VideoCapture(0)
+detector = ht.handDetector()
 while True:
     success, img = cap.read()
-    imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    results = hands.process(imgRGB)
-
-    if results.multi_hand_landmarks:
-        for handLndmks in results.multi_hand_landmarks:
-            mpDraw.draw_landmarks(img, handLndmks, mpHands.HAND_CONNECTIONS)
+    img = detector.findHands(img)
+    lmList = detector.findPosition(img)
+    if len(lmList) !=0:
+        print(lmList[4])
+    currTime = time.time()
+    fps = 1/(currTime-prevTime)
+    prevTime=currTime
+    cv2.putText(img, str(int(fps)), (10,50), cv2.FONT_HERSHEY_COMPLEX, 3, (255,0,255), 3)
     cv2.imshow("image", img)
     cv2.waitKey(1)
