@@ -39,7 +39,7 @@ class handDetector():
                     # print(f'{id}  {cx}  {cy}')
                     landmakr_list.append([id, cx, cy])
                     if draw:
-                        cv2.circle(img, (cx, cy),5, (0, 255, 255), cv2.FILLED)
+                        cv2.circle(img, (cx, cy),5, (255, 0, 0), cv2.FILLED)
             return landmakr_list
 
 
