@@ -6,6 +6,8 @@ import math
 import numpy as np
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+import screen_brightness_control as sbc
+
 
 prevTime =0
 currTime = 0
@@ -25,8 +27,10 @@ maxVolume = volRange[1]
 
 while True:
     success, img = cap.read()
-    img = detector.findHands(img)
+    img = cv2.flip(img, 1)
+    img = detector.getHandLandmarks(img)
     lmList = detector.findPosition(img)
+    handLable = detector.findHands(img)
     if len(lmList) !=0:
         print(lmList[4], lmList[8])
 
@@ -40,12 +44,17 @@ while True:
         length = math.hypot(x2-x1, y2-y1)
         print(length)
 
-        vol = np.interp(length, [20, 150], [minVolume, maxVolume])
-        volume.SetMasterVolumeLevel(vol, None)
-        print(vol)
+        if handLable == 'Right':
+            vol = np.interp(length, [20, 150], [minVolume, maxVolume])
+            volume.SetMasterVolumeLevel(vol, None)
+        if handLable == 'Left':
+            brt = np.interp(length, [20, 150], [0, 100])
+            sbc.set_brightness(brt)
+            
+
     currTime = time.time()
     fps = 1/(currTime-prevTime)
     prevTime=currTime
-    cv2.putText(img, str(int(fps)), (10,50), cv2.FONT_HERSHEY_COMPLEX, 3, (255,0,255), 3)
+    cv2.putText(img, str(int(fps)), (10,90), cv2.FONT_HERSHEY_COMPLEX, 3, (255,0,255), 3)
     cv2.imshow("image", img)
     cv2.waitKey(1)

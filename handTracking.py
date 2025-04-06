@@ -19,7 +19,7 @@ class handDetector():
         )
         self.mpDraw = mp.solutions.drawing_utils
 
-    def findHands(self, img, draw=True):
+    def getHandLandmarks(self, img, draw=True):
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.results = self.hands.process(imgRGB)
 
@@ -41,7 +41,14 @@ class handDetector():
                     if draw:
                         cv2.circle(img, (cx, cy),5, (255, 0, 0), cv2.FILLED)
             return landmakr_list
-
+    
+    def findHands(self, img, draw =True):
+        if self.results.multi_hand_landmarks:
+            for landmarks, handedness in zip(self.results.multi_hand_landmarks, self.results.multi_handedness):
+                label = handedness.classification[0].label
+                if draw:
+                    cv2.putText(img, f'{label}hand', (10, 50), cv2.FONT_HERSHEY_COMPLEX, 2, (255, 0, 0), 3)
+            return label
 
 def main():
     prevTime =0
@@ -50,6 +57,7 @@ def main():
     detector = handDetector()
     while True:
         success, img = cap.read()
+        img = cv2.flip(img, 1)
         img = detector.findHands(img)
         lmList = detector.findPosition(img)
         if len(lmList) !=0:
